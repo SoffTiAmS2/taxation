@@ -2,32 +2,41 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './AuthPage.css'; // Подключение стилей
 
-const AuthPage = () => {
+const AuthPage = ({ onLoginSuccess }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(null); // Для отображения ошибок
+  const [error, setError] = useState(null);
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('https://127.0.0.1:5000', {
+      // Отправка POST-запроса на API авторизации
+      const response = await axios.post('http://127.0.0.1:5050/api/login', {
         login: username,
         password: password,
       });
 
-      // Обрабатываем ответ
-      const userId = response.data.UserID;
-      console.log('UserID:', userId);
-      alert(`Вы успешно авторизовались! Ваш UserID: ${userId}`);
+      // Успешная авторизация
+      const { UserID, Role, message } = response.data;
+      console.log('Авторизация успешна:', { UserID, Role });
+      alert(`Добро пожаловать! Ваша роль: ${Role}`);
+      
+      // Вызываем callback для уведомления об успешной авторизации
+      if (onLoginSuccess) onLoginSuccess({ UserID, Role });
     } catch (err) {
+      // Обработка ошибок
       console.error('Ошибка авторизации:', err);
-      setError('Неверное имя пользователя или пароль');
+      if (err.response) {
+        setError(err.response.data.message || 'Ошибка сервера');
+      } else {
+        setError('Не удалось подключиться к серверу');
+      }
     }
   };
 
   return (
     <div className="auth-container">
       <h2>Вход в аккаунт</h2>
-      <form className="auth-form">
+      <form className="auth-form" onSubmit={(e) => e.preventDefault()}>
         <div className="form-group">
           <label>Логин</label>
           <input

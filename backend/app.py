@@ -92,53 +92,74 @@ def get_events():
     # Преобразуем строки в список словарей
     return jsonify([dict(event) for event in events])
 
-# Создание нового события
-@app.route('/api/events', methods=['POST'])
-def create_event():
+# Авторизация пользователя
+@app.route('/api/login', methods=['POST'])
+def login_user():
     data = request.json
+    login = data.get('login')
+    password = data.get('password')
+
+    if not login or not password:
+        return jsonify({"message": "Логин и пароль обязательны"}), 400
+
     conn = get_db()
     cursor = conn.cursor()
-    
-    cursor.execute('''
-        INSERT INTO Event (Title, Format, Place, Date, Manager, Resources_link, Price, Age_limit, Description)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (data['title'], data['format'], data['place'], data['date'], data['manager'], data['resources_link'], 
-          data['price'], data['age_limit'], data['description']))
-    
-    conn.commit()
-    event_id = cursor.lastrowid  # Получаем ID последней вставленной строки
-    conn.close()
-    
-    return jsonify({"message": "Событие создано", "event_id": event_id}), 201
 
-# Получение всех пользователей
-@app.route('/api/users', methods=['GET'])
-def get_users():
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM User")
-    users = cursor.fetchall()
+    # Ищем пользователя по логину
+    cursor.execute("SELECT * FROM User WHERE Login = ?", (login,))
+    user = cursor.fetchone()
+
+    if not user:
+        conn.close()
+        return jsonify({"message": "Пользователь с таким логином не найден"}), 404
+
+    # Сравниваем пароли
+    if user['Password'] != password:
+        conn.close()
+        return jsonify({"message": "Неверный пароль"}), 401
+
     conn.close()
 
-    return jsonify([dict(user) for user in users])
+    # Возвращаем UserID и роль пользователя
+    return jsonify({
+        "UserID": user['UserID'],
+        "Role": user['Role'],
+        "message": "Успешная авторизация"
+    }), 200
 
-# Создание нового пользователя
-@app.route('/api/users', methods=['POST'])
-def create_user():
+# Регистрация нового пользователя
+@app.route('/api/register', methods=['POST'])
+def register_user():
     data = request.json
+    login = data.get('Login')
+    password = data.get('Password')
+    role = data.get('Role', 'user')  # По умолчанию роль - user
+
+    if not login or not password:
+        return jsonify({"message": "Логин и пароль обязательны"}), 400
+
     conn = get_db()
     cursor = conn.cursor()
 
+    # Проверяем, существует ли пользователь с таким логином
+    cursor.execute("SELECT * FROM User WHERE Login = ?", (login,))
+    existing_user = cursor.fetchone()
+
+    if existing_user:
+        conn.close()
+        return jsonify({"message": "Пользователь с таким логином уже существует"}), 409
+
+    # Создаем нового пользователя
     cursor.execute('''
         INSERT INTO User (Login, Password, Role)
         VALUES (?, ?, ?)
-    ''', (data['login'], data['password'], data['role']))
+    ''', (login, password, role))
 
     conn.commit()
     user_id = cursor.lastrowid
     conn.close()
 
-    return jsonify({"message": "Пользователь создан", "user_id": user_id}), 201
+    return jsonify({"message": "Пользователь успешно зарегистрирован", "user_id": user_id}), 201
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
