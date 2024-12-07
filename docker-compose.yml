@@ -1,10 +1,22 @@
 version: "3.8"
+
 services:
-  frontend:
-    build: .
-    volumes:
-      - .:/app       # Делаем локальные файлы доступными в контейнере
-      - /app/node_modules # Исключаем node_modules из монтирования
+  backend:
+    build:
+      context: ./backend
     ports:
-      - "3000:3000"  # Прокидываем порт 3000 для доступа к приложению
-    command: sh -c "npm install && npm start" # Устанавливаем зависимости и запускаем приложение
+      - "5050:5000"  # Бэкенд доступен на порту 5000
+    volumes:
+      - ./backend:/app  # Монтируем локальную папку backend в контейнер
+    environment:
+      FLASK_ENV: development  # Включаем режим разработки (hot-reload для Flask)
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"  # Фронтенд доступен на порту 3000
+    volumes:
+      - ./frontend:/app  # Монтируем локальную папку frontend в контейнер
+      - /app/node_modules  # Исключаем node_modules
+    command: npm start  # Запуск React-приложения с hot-reload
