@@ -5,18 +5,22 @@ services:
     build:
       context: ./backend
     ports:
-      - "5050:5000"  # Бэкенд доступен на порту 5000
+      - "5050:5000"  # Хост:Контейнер
     volumes:
-      - ./backend:/app  # Монтируем локальную папку backend в контейнер
+      - ./backend:/app  # Синхронизация исходного кода
+      - ./backend/instance:/app/instance  # Для сохранения данных SQLite
     environment:
-      FLASK_ENV: development  # Включаем режим разработки (hot-reload для Flask)
+      - FLASK_ENV=development  # Устанавливаем режим разработки
+    command: python app.py  # Команда для запуска приложения
 
   frontend:
     build:
       context: ./frontend
     ports:
-      - "3000:3000"  # Фронтенд доступен на порту 3000
+      - "3000:3000"  # Хост:Контейнер
     volumes:
-      - ./frontend:/app  # Монтируем локальную папку frontend в контейнер
-      - /app/node_modules  # Исключаем node_modules
-    command: npm start  # Запуск React-приложения с hot-reload
+      - ./frontend:/app  # Синхронизация исходного кода
+      - /app/node_modules  # Исключаем node_modules из хоста
+    environment:
+      - NODE_ENV=development  # Устанавливаем режим разработки
+    command: npm start  # Команда для запуска React
