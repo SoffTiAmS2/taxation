@@ -1,14 +1,24 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './AuthPage.css'; // Подключение стилей
+import './AuthPage.css';
 
+<<<<<<< HEAD
 const AuthPage = ({ onLoginSuccess }) => {
+=======
+const AuthPage = ({ onLoginSuccess, switchToRegister }) => {
+>>>>>>> stas6
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
 
   const handleLogin = async () => {
+    if (!username || !password) {
+      setError('Логин и пароль обязательны');
+      return;
+    }
+
     try {
+<<<<<<< HEAD
       // Отправка POST-запроса на API авторизации
       const response = await axios.post('http://127.0.0.1:5050/api/login', {
         login: username,
@@ -21,6 +31,18 @@ const AuthPage = ({ onLoginSuccess }) => {
       alert(`Добро пожаловать! Ваша роль: ${Role}`);
       
       // Вызываем callback для уведомления об успешной авторизации
+=======
+      setError(null);
+
+      const response = await axios.post('http://127.0.0.1:5050/api/login', {
+        login: username.trim(),
+        password: password.trim(),
+      });
+
+      const { UserID, Role } = response.data;
+      alert(`Добро пожаловать! Ваша роль: ${Role}`);
+
+>>>>>>> stas6
       if (onLoginSuccess) onLoginSuccess({ UserID, Role });
     } catch (err) {
       // Обработка ошибок
@@ -61,6 +83,12 @@ const AuthPage = ({ onLoginSuccess }) => {
         <button type="button" onClick={handleLogin} className="login-button">
           Войти
         </button>
+        <p>
+          Нет аккаунта?{' '}
+          <span className="link" onClick={switchToRegister}>
+            Зарегистрируйтесь
+          </span>
+        </p>
       </form>
     </div>
   );
