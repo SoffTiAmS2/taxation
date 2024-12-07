@@ -1,85 +1,66 @@
 import React, { useState } from "react";
 import Slider from "react-slick";
+import { YMaps, Map, Placemark } from "react-yandex-maps";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCalendarAlt,
-  faBookmark,
-  faMapMarkerAlt,
-} from "@fortawesome/free-solid-svg-icons";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
-} from "react-leaflet";
-import L from "leaflet";
+import { faCalendarAlt, faBookmark, faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import "./App.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import AuthPage from './AuthPage'; 
-
-// Пример мероприятий с координатами
-const events = [
-  {
-    id: 1,
-    title: "Хакатон 'Цифровой Красноярск'",
-    date: "7-8 декабря",
-    organizer: "Центр 'Цифра'",
-    photo: "https://via.placeholder.com/200",
-    address: "Улица Ленина, 15",
-    coords: [56.0097, 92.7917],
-  },
-  {
-    id: 2,
-    title: "Лекция по IT",
-    date: "10 декабря",
-    organizer: "Университет",
-    photo: "https://via.placeholder.com/200",
-    address: "Улица Ленина, 15",
-    coords: [56.0097, 92.7917],
-  },
-  {
-    id: 3,
-    title: "Концерт в центре",
-    date: "15 декабря",
-    organizer: "Музыкальная студия",
-    photo: "https://via.placeholder.com/200",
-    address: "Улица Советская, 10",
-    coords: [56.0108, 92.7935],
-  },
-];
-
-// Группировка мероприятий по адресу
-const groupEventsByAddress = (events) => {
-  const grouped = {};
-  events.forEach((event) => {
-    const key = event.address;
-    if (!grouped[key]) {
-      grouped[key] = { coords: event.coords, events: [] };
-    }
-    grouped[key].events.push(event);
-  });
-  return grouped;
-};
-
-// Иконка для маркеров
-const customIcon = new L.Icon({
-  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-});
 
 const App = () => {
   const [view, setView] = useState("list");
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false); // состояние виджета фильтров
   const [selectedFilters, setSelectedFilters] = useState({
     date: "",
     type: "",
     location: "",
   });
-  const [selectedEvents, setSelectedEvents] = useState([]);
+
+  const events = [
+    {
+      id: 1,
+      title: "Концерт группы",
+      date: "2024-12-10",
+      location: "Зал 1",
+      address: "Улица Пушкина, дом 1",
+      type: "concert",
+      image: "https://via.placeholder.com/200",
+    },
+    {
+      id: 2,
+      title: "Лекция по React",
+      date: "2024-12-11",
+      location: "Зал 2",
+      address: "Улица Лермонтова, дом 15",
+      type: "lecture",
+      image: "https://via.placeholder.com/200",
+    },
+    {
+      id: 3,
+      title: "Театральная постановка",
+      date: "2024-12-12",
+      location: "Зал 1",
+      address: "Улица Пушкина, дом 1",
+      type: "theatre",
+      image: "https://via.placeholder.com/200",
+    },
+  ];
+
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [filteredEvents, setFilteredEvents] = useState([]);
+
+  // Группируем мероприятия по адресам
+  const groupedByAddress = events.reduce((acc, event) => {
+    if (!acc[event.address]) acc[event.address] = [];
+    acc[event.address].push(event);
+    return acc;
+  }, {});
+
+  // Обработчик нажатия на маркер
+  const handleMarkerClick = (address) => {
+    setSelectedAddress(address);
+    setFilteredEvents(groupedByAddress[address]);
+  };
 
   const sliderSettings = {
     dots: false,
@@ -89,9 +70,11 @@ const App = () => {
     slidesToScroll: 1,
     nextArrow: <SampleNextArrow />,
     prevArrow: <SamplePrevArrow />,
+    responsive: [
+      { breakpoint: 1024, settings: { slidesToShow: 2, slidesToScroll: 1 } },
+      { breakpoint: 768, settings: { slidesToShow: 1, slidesToScroll: 1 } },
+    ],
   };
-
-  const groupedEvents = groupEventsByAddress(events);
 
   const handleFilterChange = (key, value) => {
     setSelectedFilters((prev) => ({ ...prev, [key]: value }));
@@ -101,29 +84,15 @@ const App = () => {
     <div className="container">
       <header className="header">
         <h1>КРАС.АФИША</h1>
-        <nav>
-          <Link to="/auth">
-          <button className="auth-button">Войти</button>
-          </Link>
-        </nav>
       </header>
-
-      {/* Маршруты */}
-      <Routes>
-          <Route path="/" element={<h2>Главная страница</h2>} />
-          <Route path="/auth" element={<AuthPage />} /> {/* Маршрут для страницы авторизации */}
-        </Routes>
-
       <main>
         {/* Раздел "Мероприятия недели" */}
         <section className="section">
           <h2>Мероприятия недели</h2>
           <Slider {...sliderSettings}>
-            {Array(5)
-              .fill()
-              .map((_, index) => (
-                <EventCard key={index} />
-              ))}
+            {events.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
           </Slider>
         </section>
 
@@ -133,7 +102,7 @@ const App = () => {
             className="filter-button-widget"
             onClick={() => setFiltersOpen(!filtersOpen)}
           >
-            Фильтры
+            <h>Фильтр</h>
           </button>
           {filtersOpen && (
             <div className="filter-dropdown-widget">
@@ -194,7 +163,6 @@ const App = () => {
             </button>
           </div>
 
-          {/* Содержимое в зависимости от выбранного режима */}
           {view === "list" ? (
             <div className="event-list">
               {events.map((event) => (
@@ -203,36 +171,36 @@ const App = () => {
             </div>
           ) : (
             <div className="map-container">
-              <MapContainer
-                center={[56.0108, 92.7909]}
-                zoom={14}
-                style={{ height: "400px", width: "100%" }}
-              >
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution="&copy; OpenStreetMap contributors"
-                />
-                {Object.values(groupedEvents).map((location, index) => (
-                  <Marker
-                    key={index}
-                    position={location.coords}
-                    icon={customIcon}
-                    eventHandlers={{
-                      click: () => setSelectedEvents(location.events),
-                    }}
-                  >
-                    <Popup>
-                      <strong>{location.events.length} мероприятий</strong>
-                    </Popup>
-                  </Marker>
-                ))}
-              </MapContainer>
-              {selectedEvents.length > 0 && (
-                <div className="event-list">
-                  <h3>Мероприятия по этому адресу:</h3>
-                  {selectedEvents.map((event) => (
-                    <EventCard key={event.id} event={event} />
+              <YMaps>
+                <Map
+                  defaultState={{ center: [55.751574, 37.573856], zoom: 10 }}
+                  width="100%"
+                  height="400px"
+                >
+                  {Object.keys(groupedByAddress).map((address, index) => (
+                    <Placemark
+                      key={index}
+                      geometry={[55.751574 + index * 0.01, 37.573856 + index * 0.01]}
+                      properties={{
+                        hintContent: address,
+                        balloonContent: `Мероприятий: ${groupedByAddress[address].length}`,
+                      }}
+                      options={{ preset: "islands#redIcon" }}
+                      onClick={() => handleMarkerClick(address)}
+                    />
                   ))}
+                </Map>
+              </YMaps>
+
+              {selectedAddress && (
+                <div className="event-widget">
+                  <h2>Мероприятия по адресу:</h2>
+                  <p>{selectedAddress}</p>
+                  <div className="widget-event-list">
+                    {filteredEvents.map((event) => (
+                      <EventCard key={event.id} event={event} />
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -243,7 +211,6 @@ const App = () => {
   );
 };
 
-// Стрелки для карусели
 const SampleNextArrow = (props) => {
   const { onClick } = props;
   return <div className="arrow next" onClick={onClick}></div>;
@@ -254,12 +221,19 @@ const SamplePrevArrow = (props) => {
   return <div className="arrow prev" onClick={onClick}></div>;
 };
 
-// Карточка мероприятия
 const EventCard = ({ event }) => (
   <div className="event-card">
-    <img src={event?.photo || "https://via.placeholder.com/200"} alt="Мероприятие" className="event-image" />
-    <p className="event-date">{event?.date}</p>
-    <p className="event-title">{event?.title}</p>
+    <img src={event.image} alt={event.title} className="event-image" />
+    <p className="event-date">{event.date}</p>
+    <p className="event-title">{event.title}</p>
+  </div>
+);
+
+const WidgetEventCard = ({ event }) => (
+  <div className="event-card">
+    <img src={event.image} alt={event.title} className="widget-event-image" />
+    <p className="widget-event-date">{event.date}</p>
+    <p className="widget-event-title">{event.title}</p>
   </div>
 );
 
