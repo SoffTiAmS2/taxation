@@ -1,11 +1,10 @@
-version: '3.8'
-
+version: "3.8"
 services:
   frontend:
     build: .
     volumes:
-      - .:/app
-      - /app/node_modules
+      - .:/app       # Делаем локальные файлы доступными в контейнере
+      - /app/node_modules # Исключаем node_modules из монтирования
     ports:
-      - "3000:3000"
-    command: sh -c "npm install && npm start"
+      - "3000:3000"  # Прокидываем порт 3000 для доступа к приложению
+    command: sh -c "npm install && npm start" # Устанавливаем зависимости и запускаем приложение

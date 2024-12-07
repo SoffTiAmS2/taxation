@@ -66,6 +66,7 @@ const App = () => {
   );
 };
 
+
 const EventCard = () => (
   <div className="event-card">
     <img
