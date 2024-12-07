@@ -1,96 +1,283 @@
 /* Общий контейнер */
 .container {
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
-    padding: 20px;
-  }
-  
-  /* Шапка */
-  .header {
-    background-color: #d32f2f;
-    color: white;
-    padding: 10px 20px;
-  }
-  
-  .header h1 {
-    margin: 0;
-    font-size: 24px;
-  }
-  
-  /* Разделы */
-  .section {
-    margin: 20px 0;
-  }
-  
-  .section h2 {
-    font-size: 20px;
-    margin-bottom: 10px;
-  }
-  
-  /* Фильтры */
-  .filters {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  
-  .filter-button {
-    background-color: transparent;
-    border: none;
-    padding: 10px 15px;
-    font-size: 16px;
-    color: #6d6d6d;
-    cursor: pointer;
-    transition: color 0.3s ease;
-  }
-  
-  .filter-button.active {
-    color: #d32f2f;
-    font-weight: bold;
-  }
-  
-  .filter-button:hover {
-    color: #d32f2f;
-  }
-  
-  /* Список мероприятий */
-  .event-list {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-  }
-  
+  font-family: 'Montserrat', sans-serif;
+  background-color: #f9f9f9;
+  padding: 20px;
+}
+
+/* Подключаем шрифт Montserrat */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap');
+
+/* Шапка */
+.header {
+  background-color: #d32f2f;
+  padding-top: 0.5cm;
+  padding-left: 1cm;
+  padding-bottom: 0.5cm;
+  margin-bottom: 10px;
+  width:100%;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 36px;
+  color: white; 
+}
+
+/* Контейнер для карусели */
+
+
+
+/* Список мероприятий */
+.event-list {
+  display: grid; /* Используем грид для размещения карточек */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* 5 карточек в ряду, адаптивная ширина */
+  gap: 20px; /* Отступы между карточками */
+  justify-content: center; /* Центрируем грид */
+  margin-top: 20px; /* Отступ сверху */
+}
+
+.event-card {
+  margin: 0 auto;
+  width: calc(100% - 20px); /* Подстраиваем ширину карточек */
+  max-width: 300px; /* Максимальная ширина карточек */
+  text-align: center;
+  position: relative; /* Родительский элемент для абсолютного позиционирования */
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 1025px) {
   .event-card {
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    width: 200px;
-    overflow: hidden;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 300px; /* Для больших экранов фиксируем ширину */
   }
-  
-  .event-image {
-    width: 100%;
-    height: auto;
+}
+
+.event-image {
+  border-radius: 5px;
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.event-date {
+  position: absolute; /* Абсолютное позиционирование относительно карточки */
+  bottom: 20%; /* Отступ от нижнего края карточки */
+  right: 10px; /* Отступ от правого края карточки */
+  background-color: rgba(0, 0, 0, 0.7); /* Полупрозрачный фон */
+  color: white; /* Цвет текста */
+  font-size: 14px; /* Размер текста */
+  font-weight: bold;
+  padding: 5px 10px; /* Отступы внутри блока */
+  border-radius: 4px; /* Закруглённые углы */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Тень для блока */
+  z-index: 2; /* Чтобы быть выше изображения */
+}
+
+.event-title {
+  padding: 10px;
+  margin: 0;
+  font-size: 16px;
+}
+
+/* Карусель */
+/* Контейнер карусели */
+.slick-slider {
+  position: relative;
+  margin: 0 auto; /* Центрируем */
+  max-width: 100%; /* Гарантируем, что карусель не выйдет за экран */
+  overflow: hidden; /* Предотвращаем выпадение элементов за границы */
+  padding: 0 50px; /* Добавляем отступы, чтобы карточки не накладывались на стрелки */
+}
+
+/* Стрелки */
+.arrow {
+  position: absolute;
+  top: 50%; /* Центруем по вертикали */
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 10; /* Стрелки всегда выше остальных элементов */
+}
+
+.arrow.prev {
+  left: 10px; /* Делаем отступ от левого края карусели */
+}
+
+.arrow.next {
+  right: 10px; /* Делаем отступ от правого края карусели */
+}
+
+/* Увеличиваем зону клика */
+.arrow:hover {
+  background-color: #d32f2f;
+}
+
+/* Карточки */
+.event-card {
+  margin: 0 auto;
+  width: calc(100% - 20px); /* Подстраиваем ширину карточек */
+  max-width: 300px; /* Максимальная ширина карточек */
+  text-align: center;
+}
+
+/* При уменьшении ширины экрана карточки будут занимать всю ширину карусели */
+@media (max-width: 1024px) {
+  .slick-slider {
+    padding: 0 20px; /* Уменьшаем отступы */
   }
-  
-  .event-date {
-    background-color: #d32f2f;
-    color: white;
-    padding: 5px 0;
-    margin: 0;
-    font-weight: bold;
+
+  .arrow.prev {
+    left: 5px;
   }
-  
-  .event-title {
-    padding: 10px;
-    margin: 0;
-    font-size: 16px;
+
+  .arrow.next {
+    right: 5px;
   }
-  
-  /* Контейнер для карты */
-  .map-container {
-    margin-top: 20px;
+
+  .event-card {
+    max-width: 250px;
   }
-  
+}
+
+@media (max-width: 768px) {
+  .slick-slider {
+    padding: 0 10px; /* Ещё меньше отступов */
+  }
+
+  .arrow.prev {
+    left: 5px;
+  }
+
+  .arrow.next {
+    right: 5px;
+  }
+
+  .event-card {
+    max-width: 200px;
+  }
+}
+
+/* Фильтры */
+.filters {
+display: flex;
+gap: 10px;
+margin-bottom: 20px;
+}
+.filter-button {
+background-color: transparent;
+border: none;
+padding: 10px 15px;
+font-size: 16px;
+color: #6d6d6d;
+cursor: pointer;
+transition: color 0.3s ease;
+}
+.filter-button.active {
+color: #d32f2f;
+font-weight: bold;
+}
+.filter-button:hover {
+color: #d32f2f;
+}
+
+/* Виджет фильтров */
+.filter-widget {
+  position: absolute;
+  margin-top: 0.9cm;
+  right: 4.5cm;
+}
+.filter-button-widget {
+background-color: transparent;
+color: rgb(27, 27, 27);
+border: none;
+font-size: 30;
+border-radius: 5px;
+cursor: pointer;
+}
+.filter-button-widget h{
+  margin: 0;
+  font-size: 24px;
+  font-family: 'Montserrat';
+}
+.filter-dropdown-widget {
+position: absolute;
+background: white;
+border: 1px solid #ddd;
+border-radius: 8px;
+padding: 15px;
+width: 250px;
+box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+z-index: 100;
+top: 45px;
+}
+.filter-item {
+margin-bottom: 10px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+.filter-item label {
+flex: 1;
+}
+.icon {
+color: #d32f2f;
+font-size: 18px;
+}
+
+/*Виджет мероприятий для карт*/
+.event-widget {
+  position: absolute;
+  width: 30%;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  top: 10cm;
+}
+
+.event-widget h2 {
+  margin-bottom: 10px;
+  font-size: 20px;
+  font-weight: bold;
+}
+.widget-event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.widget-event-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.widget-event-image {
+  width: 100%;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.widget-event-title {
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.widget-event-date {
+  font-size: 14px;
+  color: #777;
+}
