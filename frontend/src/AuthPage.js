@@ -1,58 +1,64 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './AuthPage.css'; // Подключение стилей
 
 const AuthPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(null); // Для отображения ошибок
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('https://127.0.0.1:5000', {
-        login: username,
-        password: password,
+      // Отправка данных на сервер
+      const response = await axios.post('http://127.0.0.1:5050', {
+        Login: username,
+        Password: password
       });
 
-      // Обрабатываем ответ
-      const userId = response.data.UserID;
-      console.log('UserID:', userId);
-      alert(`Вы успешно авторизовались! Ваш UserID: ${userId}`);
-    } catch (err) {
-      console.error('Ошибка авторизации:', err);
-      setError('Неверное имя пользователя или пароль');
+      // Если запрос успешный, выводим сообщение об успешной авторизации
+      setSuccessMessage(response.data.message);
+      setErrorMessage('');
+    } catch (error) {
+      // В случае ошибки выводим сообщение об ошибке
+      if (error.response) {
+        setErrorMessage(error.response.data.message);
+      } else {
+        setErrorMessage('Ошибка соединения с сервером');
+      }
+      setSuccessMessage('');
     }
   };
 
   return (
-    <div className="auth-container">
-      <h2>Вход в аккаунт</h2>
-      <form className="auth-form">
-        <div className="form-group">
-          <label>Логин</label>
+    <div>
+      <h2>Страница авторизации</h2>
+      <form onSubmit={(e) => e.preventDefault()}>
+        <div>
+          <label>Имя пользователя</label>
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            placeholder="Введите логин"
           />
         </div>
-        <div className="form-group">
+        <div>
           <label>Пароль</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            placeholder="Введите пароль"
           />
         </div>
-        {error && <div className="error">{error}</div>}
-        <button type="button" onClick={handleLogin} className="login-button">
+        <button type="button" onClick={handleLogin}>
           Войти
         </button>
       </form>
+
+      {/* Отображаем ошибки или успех */}
+      {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
+      {successMessage && <div style={{ color: 'green' }}>{successMessage}</div>}
     </div>
   );
 };
