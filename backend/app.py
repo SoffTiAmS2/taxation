@@ -111,16 +111,40 @@ def create_event():
     
     return jsonify({"message": "Событие создано", "event_id": event_id}), 201
 
-# Получение всех пользователей
-@app.route('/api/users', methods=['GET'])
-def get_users():
+# Авторизация пользователя
+@app.route('/api/login', methods=['POST'])
+def login_user():
+    data = request.json
+    login = data.get('login')
+    password = data.get('password')
+
+    if not login or not password:
+        return jsonify({"message": "Логин и пароль обязательны"}), 400
+
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM User")
-    users = cursor.fetchall()
+
+    # Ищем пользователя по логину
+    cursor.execute("SELECT * FROM User WHERE Login = ?", (login,))
+    user = cursor.fetchone()
+
+    if not user:
+        conn.close()
+        return jsonify({"message": "Пользователь с таким логином не найден"}), 404
+
+    # Сравниваем пароли
+    if user['Password'] != password:
+        conn.close()
+        return jsonify({"message": "Неверный пароль"}), 401
+
     conn.close()
 
-    return jsonify([dict(user) for user in users])
+    # Возвращаем UserID и роль пользователя
+    return jsonify({
+        "UserID": user['UserID'],
+        "Role": user['Role'],
+        "message": "Успешная авторизация"
+    }), 200
 
 # Создание нового пользователя
 @app.route('/api/users', methods=['POST'])

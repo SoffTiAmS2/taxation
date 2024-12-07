@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Slider from "react-slick";
 import { YMaps, Map, Placemark } from "react-yandex-maps";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -10,6 +10,7 @@ import AuthPage from "./AuthPage";
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState("home"); // Состояние текущей страницы
+  const [user, setUser] = useState(null); // Состояние авторизованного пользователя
   const [view, setView] = useState("list");
   const [filtersOpen, setFiltersOpen] = useState(false); // Состояние виджета фильтров
   const [selectedFilters, setSelectedFilters] = useState({
@@ -19,7 +20,6 @@ const App = () => {
   });
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [filteredEvents, setFilteredEvents] = useState([]);
-  // const [events, setEvents] = useState([]); // Состояние для событий
 
   const events = [
     {
@@ -80,14 +80,23 @@ const App = () => {
     setSelectedFilters((prev) => ({ ...prev, [key]: value }));
   };
 
+  const handleLoginSuccess = (userData) => {
+    setUser(userData); // Сохраняем данные пользователя
+    setCurrentPage("home"); // Возвращаемся на главную страницу
+  };
+
   const renderPage = () => {
     if (currentPage === "home") {
       return (
         <div className="container">
           <header className="header">
             <h1>КРАС.АФИША</h1>
+            {user ? (
+              <p>Добро пожаловать, {user.Role}!</p>
+            ) : (
+              <button onClick={() => setCurrentPage("auth")}>Войти</button>
+            )}
           </header>
-          <button onClick={() => setCurrentPage("auth")}>Войти</button>
           <main>
             <section className="section">
               <h2>Мероприятия недели</h2>
@@ -103,7 +112,7 @@ const App = () => {
                 className="filter-button-widget"
                 onClick={() => setFiltersOpen(!filtersOpen)}
               >
-                <h>Фильтр</h>
+                Фильтр
               </button>
               {filtersOpen && (
                 <div className="filter-dropdown-widget">
@@ -129,23 +138,9 @@ const App = () => {
                       <option value="lecture">Лекция</option>
                     </select>
                   </div>
-                  <div className="filter-item">
-                    <FontAwesomeIcon icon={faMapMarkerAlt} className="icon" />
-                    <label>Площадка</label>
-                    <select
-                      value={selectedFilters.location}
-                      onChange={(e) => handleFilterChange("location", e.target.value)}
-                    >
-                      <option value="">Все</option>
-                      <option value="venue1">Зал 1</option>
-                      <option value="venue2">Зал 2</option>
-                      <option value="venue3">Зал 3</option>
-                    </select>
-                  </div>
                 </div>
               )}
             </div>
-
             <section className="section">
               <h2>Все мероприятия</h2>
               <div className="filters">
@@ -162,7 +157,6 @@ const App = () => {
                   На карте
                 </button>
               </div>
-
               {view === "list" ? (
                 <div className="event-list">
                   {events.map((event) => (
@@ -170,47 +164,33 @@ const App = () => {
                   ))}
                 </div>
               ) : (
-                <div className="map-container">
-                  <YMaps>
-                    <Map
-                      defaultState={{ center: [55.998572, 92.919065], zoom: 10 }}
-                      width="100%"
-                      height="400px"
-                    >
-                      {Object.keys(groupedByAddress).map((address, index) => (
-                        <Placemark
-                          key={index}
-                          geometry={[55.998572, 92.919065 + index * 0.01, 55.998572, 92.919065]}
-                          properties={{
-                            hintContent: address,
-                            balloonContent: `Мероприятий: ${groupedByAddress[address].length}`,
-                          }}
-                          options={{ preset: "islands#redIcon" }}
-                          onClick={() => handleMarkerClick(address)}
-                        />
-                      ))}
-                    </Map>
-                  </YMaps>
-
-                  {selectedAddress && (
-                    <div className="event-widget">
-                      <h2>Мероприятия по адресу:</h2>
-                      <p>{selectedAddress}</p>
-                      <div className="widget-event-list">
-                        {filteredEvents.map((event) => (
-                          <EventCard key={event.id} event={event} />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <YMaps>
+                  <Map
+                    defaultState={{ center: [55.998572, 92.919065], zoom: 10 }}
+                    width="100%"
+                    height="400px"
+                  >
+                    {Object.keys(groupedByAddress).map((address, index) => (
+                      <Placemark
+                        key={index}
+                        geometry={[55.998572 + index * 0.01, 92.919065]}
+                        properties={{
+                          hintContent: address,
+                          balloonContent: `Мероприятий: ${groupedByAddress[address].length}`,
+                        }}
+                        options={{ preset: "islands#redIcon" }}
+                        onClick={() => handleMarkerClick(address)}
+                      />
+                    ))}
+                  </Map>
+                </YMaps>
               )}
             </section>
           </main>
         </div>
       );
     } else if (currentPage === "auth") {
-      return <AuthPage goBack={() => setCurrentPage("home")} />;
+      return <AuthPage onLoginSuccess={handleLoginSuccess} />;
     }
   };
 
@@ -234,4 +214,5 @@ const EventCard = ({ event }) => (
     <p className="event-title">{event.title}</p>
   </div>
 );
+
 export default App;
