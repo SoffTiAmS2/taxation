@@ -7,11 +7,12 @@ import "./App.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import AuthPage from "./AuthPage";
+import RegisterPage from "./RegisterPage";
 
 const App = () => {
-  const [currentPage, setCurrentPage] = useState("home"); // Состояние текущей страницы
-  const [user, setUser] = useState(null); // Состояние авторизованного пользователя
-  const [view, setView] = useState("list");
+  const [currentPage, setCurrentPage] = useState("home"); // 'home', 'auth', 'register'
+  const [user, setUser] = useState(null); // Данные авторизованного пользователя
+  const [view, setView] = useState("list"); // Вид отображения: список или карта
   const [filtersOpen, setFiltersOpen] = useState(false); // Состояние виджета фильтров
   const [selectedFilters, setSelectedFilters] = useState({
     date: "",
@@ -21,6 +22,7 @@ const App = () => {
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [filteredEvents, setFilteredEvents] = useState([]);
 
+  // Список мероприятий
   const events = [
     {
       id: 1,
@@ -51,6 +53,7 @@ const App = () => {
     },
   ];
 
+  // Группировка мероприятий по адресу
   const groupedByAddress = events.reduce((acc, event) => {
     if (!acc[event.address]) acc[event.address] = [];
     acc[event.address].push(event);
@@ -81,116 +84,133 @@ const App = () => {
   };
 
   const handleLoginSuccess = (userData) => {
-    setUser(userData); // Сохраняем данные пользователя
-    setCurrentPage("home"); // Возвращаемся на главную страницу
+    setUser(userData); // Устанавливаем данные авторизованного пользователя
+    setCurrentPage("home");
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setCurrentPage("auth");
   };
 
   const renderPage = () => {
-    if (currentPage === "home") {
-      return (
-        <div className="container">
-          <header className="header">
-            <h1>КРАС.АФИША</h1>
-            {user ? (
-              <p>Добро пожаловать, {user.Role}!</p>
-            ) : (
-              <button onClick={() => setCurrentPage("auth")}>Войти</button>
-            )}
-          </header>
-          <main>
-            <section className="section">
-              <h2>Мероприятия недели</h2>
-              <Slider {...sliderSettings}>
-                {events.map((event) => (
-                  <EventCard key={event.id} event={event} />
-                ))}
-              </Slider>
-            </section>
-
-            <div className="filter-widget">
-              <button
-                className="filter-button-widget"
-                onClick={() => setFiltersOpen(!filtersOpen)}
-              >
-                Фильтр
-              </button>
-              {filtersOpen && (
-                <div className="filter-dropdown-widget">
-                  <div className="filter-item">
-                    <FontAwesomeIcon icon={faCalendarAlt} className="icon" />
-                    <label>Дата</label>
-                    <input
-                      type="date"
-                      value={selectedFilters.date}
-                      onChange={(e) => handleFilterChange("date", e.target.value)}
-                    />
-                  </div>
-                  <div className="filter-item">
-                    <FontAwesomeIcon icon={faBookmark} className="icon" />
-                    <label>Тип мероприятия</label>
-                    <select
-                      value={selectedFilters.type}
-                      onChange={(e) => handleFilterChange("type", e.target.value)}
-                    >
-                      <option value="">Все</option>
-                      <option value="concert">Концерт</option>
-                      <option value="theatre">Спектакль</option>
-                      <option value="lecture">Лекция</option>
-                    </select>
-                  </div>
-                </div>
+    switch (currentPage) {
+      case "auth":
+        return (
+          <AuthPage
+            onLoginSuccess={handleLoginSuccess}
+            switchToRegister={() => setCurrentPage("register")}
+          />
+        );
+      case "register":
+        return <RegisterPage switchToLogin={() => setCurrentPage("auth")} />;
+      case "home":
+      default:
+        return (
+          <div className="container">
+            <header className="header">
+              <h1>КРАС.АФИША</h1>
+              {user ? (
+                <>
+                  <p>Добро пожаловать, {user.Role}!</p>
+                  <button onClick={handleLogout}>Выйти</button>
+                </>
+              ) : (
+                <button onClick={() => setCurrentPage("auth")}>Войти</button>
               )}
-            </div>
-            <section className="section">
-              <h2>Все мероприятия</h2>
-              <div className="filters">
-                <button
-                  className={`filter-button ${view === "list" ? "active" : ""}`}
-                  onClick={() => setView("list")}
-                >
-                  Списком
-                </button>
-                <button
-                  className={`filter-button ${view === "map" ? "active" : ""}`}
-                  onClick={() => setView("map")}
-                >
-                  На карте
-                </button>
-              </div>
-              {view === "list" ? (
-                <div className="event-list">
+            </header>
+            <main>
+              <section className="section">
+                <h2>Мероприятия недели</h2>
+                <Slider {...sliderSettings}>
                   {events.map((event) => (
                     <EventCard key={event.id} event={event} />
                   ))}
-                </div>
-              ) : (
-                <YMaps>
-                  <Map
-                    defaultState={{ center: [55.998572, 92.919065], zoom: 10 }}
-                    width="100%"
-                    height="400px"
-                  >
-                    {Object.keys(groupedByAddress).map((address, index) => (
-                      <Placemark
-                        key={index}
-                        geometry={[55.998572 + index * 0.01, 92.919065]}
-                        properties={{
-                          hintContent: address,
-                          balloonContent: `Мероприятий: ${groupedByAddress[address].length}`,
-                        }}
-                        options={{ preset: "islands#redIcon" }}
-                        onClick={() => handleMarkerClick(address)}
+                </Slider>
+              </section>
+
+              <div className="filter-widget">
+                <button
+                  className="filter-button-widget"
+                  onClick={() => setFiltersOpen(!filtersOpen)}
+                >
+                  Фильтр
+                </button>
+                {filtersOpen && (
+                  <div className="filter-dropdown-widget">
+                    <div className="filter-item">
+                      <FontAwesomeIcon icon={faCalendarAlt} className="icon" />
+                      <label>Дата</label>
+                      <input
+                        type="date"
+                        value={selectedFilters.date}
+                        onChange={(e) => handleFilterChange("date", e.target.value)}
                       />
+                    </div>
+                    <div className="filter-item">
+                      <FontAwesomeIcon icon={faBookmark} className="icon" />
+                      <label>Тип мероприятия</label>
+                      <select
+                        value={selectedFilters.type}
+                        onChange={(e) => handleFilterChange("type", e.target.value)}
+                      >
+                        <option value="">Все</option>
+                        <option value="concert">Концерт</option>
+                        <option value="theatre">Спектакль</option>
+                        <option value="lecture">Лекция</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <section className="section">
+                <h2>Все мероприятия</h2>
+                <div className="filters">
+                  <button
+                    className={`filter-button ${view === "list" ? "active" : ""}`}
+                    onClick={() => setView("list")}
+                  >
+                    Списком
+                  </button>
+                  <button
+                    className={`filter-button ${view === "map" ? "active" : ""}`}
+                    onClick={() => setView("map")}
+                  >
+                    На карте
+                  </button>
+                </div>
+                {view === "list" ? (
+                  <div className="event-list">
+                    {events.map((event) => (
+                      <EventCard key={event.id} event={event} />
                     ))}
-                  </Map>
-                </YMaps>
-              )}
-            </section>
-          </main>
-        </div>
-      );
-    } else if (currentPage === "auth") {
-      return <AuthPage onLoginSuccess={handleLoginSuccess} />;
+                  </div>
+                ) : (
+                  <YMaps>
+                    <Map
+                      defaultState={{ center: [55.998572, 92.919065], zoom: 10 }}
+                      width="100%"
+                      height="400px"
+                    >
+                      {Object.keys(groupedByAddress).map((address, index) => (
+                        <Placemark
+                          key={index}
+                          geometry={[55.998572 + index * 0.01, 92.919065]}
+                          properties={{
+                            hintContent: address,
+                            balloonContent: `Мероприятий: ${groupedByAddress[address].length}`,
+                          }}
+                          options={{ preset: "islands#redIcon" }}
+                          onClick={() => handleMarkerClick(address)}
+                        />
+                      ))}
+                    </Map>
+                  </YMaps>
+                )}
+              </section>
+            </main>
+          </div>
+        );
     }
   };
 

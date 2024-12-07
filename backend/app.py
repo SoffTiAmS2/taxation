@@ -3,7 +3,7 @@ import sqlite3
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # Разрешаем запросы с других доменов
+CORS(app, resources={r"/api/*": {"origins": "*"}})  # Разрешаем запросы с других доменов
 
 # Путь к базе данных
 DATABASE = 'events.db'
@@ -23,13 +23,12 @@ def init_db():
     cursor.execute('PRAGMA foreign_keys = ON;')
 
     # Создание таблиц
-# Создание таблиц
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS User (
         UserID INTEGER PRIMARY KEY AUTOINCREMENT,
-        Login TEXT NOT NULL,
+        Login TEXT NOT NULL UNIQUE,
         Password TEXT NOT NULL,
-        Role TEXT CHECK(Role IN ('user', 'admin', 'organizer'))
+        Role TEXT CHECK(Role IN ('user', 'admin', 'organizer')) DEFAULT 'user'
     );
     ''')
 
@@ -67,12 +66,11 @@ def init_db():
         NotificationID INTEGER PRIMARY KEY AUTOINCREMENT,
         UserID INTEGER,
         Description TEXT,
-        Read_status TEXT CHECK(Read_status IN ('unread', 'read')),
+        Read_status TEXT CHECK(Read_status IN ('unread', 'read')) DEFAULT 'unread',
         Created_at DATETIME,
         FOREIGN KEY (UserID) REFERENCES User(UserID)
     );
     ''')
-
 
     conn.commit()
     conn.close()
@@ -131,9 +129,9 @@ def login_user():
 @app.route('/api/register', methods=['POST'])
 def register_user():
     data = request.json
-    login = data.get('Login')
-    password = data.get('Password')
-    role = data.get('Role', 'user')  # По умолчанию роль - user
+    login = data.get('login')
+    password = data.get('password')
+    role = data.get('role', 'user')  # По умолчанию роль - user
 
     if not login or not password:
         return jsonify({"message": "Логин и пароль обязательны"}), 400
@@ -160,6 +158,29 @@ def register_user():
     conn.close()
 
     return jsonify({"message": "Пользователь успешно зарегистрирован", "user_id": user_id}), 201
+
+# Получение информации о пользователе
+@app.route('/api/user/<int:user_id>', methods=['GET'])
+def get_user(user_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM User WHERE UserID = ?", (user_id,))
+    user = cursor.fetchone()
+    conn.close()
+
+    if not user:
+        return jsonify({"message": "Пользователь не найден"}), 404
+
+    return jsonify(dict(user))
+
+# Обработка ошибок
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({"message": "Ресурс не найден"}), 404
+
+@app.errorhandler(500)
+def server_error(error):
+    return jsonify({"message": "Внутренняя ошибка сервера"}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
