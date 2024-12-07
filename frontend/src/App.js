@@ -19,25 +19,37 @@ const App = () => {
   });
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [filteredEvents, setFilteredEvents] = useState([]);
-  const [events, setEvents] = useState([]); // Состояние для событий
+  // const [events, setEvents] = useState([]); // Состояние для событий
 
-  // Получение данных с бэкенда
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await fetch("http://localhost:5050/api/events");
-        if (!response.ok) {
-          throw new Error("Ошибка при загрузке данных");
-        }
-        const data = await response.json();
-        setEvents(data);
-      } catch (error) {
-        console.error("Ошибка:", error);
-      }
-    };
-
-    fetchEvents();
-  }, []);
+  const events = [
+    {
+      id: 1,
+      title: "Хакатон Цифровой Красноярск",
+      date: "7-8 декабря",
+      location: "Молодёжный ИТ-центр",
+      address: "проспект имени газеты Красноярский рабочий, дом 115а",
+      type: "hackathon",
+      image: "https://via.placeholder.com/200",
+    },
+    {
+      id: 2,
+      title: "Лекция по React",
+      date: "7 декабря",
+      location: "Молодёжный ИТ-центр",
+      address: "проспект имени газеты Красноярский рабочий, дом 115а",
+      type: "lecture",
+      image: "https://via.placeholder.com/200",
+    },
+    {
+      id: 3,
+      title: "Рок-концерт",
+      date: "8 декабря",
+      location: "Музыкальный коворкинг Волна",
+      address: "проспект имени газеты Красноярский рабочий, дом 87",
+      type: "concert",
+      image: "https://via.placeholder.com/200",
+    },
+  ];
 
   const groupedByAddress = events.reduce((acc, event) => {
     if (!acc[event.address]) acc[event.address] = [];
@@ -85,7 +97,115 @@ const App = () => {
                 ))}
               </Slider>
             </section>
-            {/* Остальной код для фильтров и отображения */}
+
+            <div className="filter-widget">
+              <button
+                className="filter-button-widget"
+                onClick={() => setFiltersOpen(!filtersOpen)}
+              >
+                <h>Фильтр</h>
+              </button>
+              {filtersOpen && (
+                <div className="filter-dropdown-widget">
+                  <div className="filter-item">
+                    <FontAwesomeIcon icon={faCalendarAlt} className="icon" />
+                    <label>Дата</label>
+                    <input
+                      type="date"
+                      value={selectedFilters.date}
+                      onChange={(e) => handleFilterChange("date", e.target.value)}
+                    />
+                  </div>
+                  <div className="filter-item">
+                    <FontAwesomeIcon icon={faBookmark} className="icon" />
+                    <label>Тип мероприятия</label>
+                    <select
+                      value={selectedFilters.type}
+                      onChange={(e) => handleFilterChange("type", e.target.value)}
+                    >
+                      <option value="">Все</option>
+                      <option value="concert">Концерт</option>
+                      <option value="theatre">Спектакль</option>
+                      <option value="lecture">Лекция</option>
+                    </select>
+                  </div>
+                  <div className="filter-item">
+                    <FontAwesomeIcon icon={faMapMarkerAlt} className="icon" />
+                    <label>Площадка</label>
+                    <select
+                      value={selectedFilters.location}
+                      onChange={(e) => handleFilterChange("location", e.target.value)}
+                    >
+                      <option value="">Все</option>
+                      <option value="venue1">Зал 1</option>
+                      <option value="venue2">Зал 2</option>
+                      <option value="venue3">Зал 3</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <section className="section">
+              <h2>Все мероприятия</h2>
+              <div className="filters">
+                <button
+                  className={`filter-button ${view === "list" ? "active" : ""}`}
+                  onClick={() => setView("list")}
+                >
+                  Списком
+                </button>
+                <button
+                  className={`filter-button ${view === "map" ? "active" : ""}`}
+                  onClick={() => setView("map")}
+                >
+                  На карте
+                </button>
+              </div>
+
+              {view === "list" ? (
+                <div className="event-list">
+                  {events.map((event) => (
+                    <EventCard key={event.id} event={event} />
+                  ))}
+                </div>
+              ) : (
+                <div className="map-container">
+                  <YMaps>
+                    <Map
+                      defaultState={{ center: [55.998572, 92.919065], zoom: 10 }}
+                      width="100%"
+                      height="400px"
+                    >
+                      {Object.keys(groupedByAddress).map((address, index) => (
+                        <Placemark
+                          key={index}
+                          geometry={[55.998572, 92.919065 + index * 0.01, 55.998572, 92.919065]}
+                          properties={{
+                            hintContent: address,
+                            balloonContent: `Мероприятий: ${groupedByAddress[address].length}`,
+                          }}
+                          options={{ preset: "islands#redIcon" }}
+                          onClick={() => handleMarkerClick(address)}
+                        />
+                      ))}
+                    </Map>
+                  </YMaps>
+
+                  {selectedAddress && (
+                    <div className="event-widget">
+                      <h2>Мероприятия по адресу:</h2>
+                      <p>{selectedAddress}</p>
+                      <div className="widget-event-list">
+                        {filteredEvents.map((event) => (
+                          <EventCard key={event.id} event={event} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
           </main>
         </div>
       );
@@ -114,5 +234,4 @@ const EventCard = ({ event }) => (
     <p className="event-title">{event.title}</p>
   </div>
 );
-
 export default App;
