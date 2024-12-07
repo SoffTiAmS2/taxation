@@ -6,15 +6,19 @@ import { faCalendarAlt, faBookmark, faMapMarkerAlt } from "@fortawesome/free-sol
 import "./App.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import AuthPage from "./AuthPage";
 
 const App = () => {
+  const [currentPage, setCurrentPage] = useState("home"); // Состояние текущей страницы
   const [view, setView] = useState("list");
-  const [filtersOpen, setFiltersOpen] = useState(false); // состояние виджета фильтров
+  const [filtersOpen, setFiltersOpen] = useState(false); // Состояние виджета фильтров
   const [selectedFilters, setSelectedFilters] = useState({
     date: "",
     type: "",
     location: "",
   });
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [filteredEvents, setFilteredEvents] = useState([]);
 
   const events = [
     {
@@ -46,17 +50,12 @@ const App = () => {
     },
   ];
 
-  const [selectedAddress, setSelectedAddress] = useState(null);
-  const [filteredEvents, setFilteredEvents] = useState([]);
-
-  // Группируем мероприятия по адресам
   const groupedByAddress = events.reduce((acc, event) => {
     if (!acc[event.address]) acc[event.address] = [];
     acc[event.address].push(event);
     return acc;
   }, {});
 
-  // Обработчик нажатия на маркер
   const handleMarkerClick = (address) => {
     setSelectedAddress(address);
     setFilteredEvents(groupedByAddress[address]);
@@ -80,135 +79,142 @@ const App = () => {
     setSelectedFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  return (
-    <div className="container">
-      <header className="header">
-        <h1>КРАС.АФИША</h1>
-      </header>
-      <main>
-        {/* Раздел "Мероприятия недели" */}
-        <section className="section">
-          <h2>Мероприятия недели</h2>
-          <Slider {...sliderSettings}>
-            {events.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </Slider>
-        </section>
+  // Основной рендеринг JSX
+  const renderPage = () => {
+    if (currentPage === "home") {
+      return (
+        <div className="container">
+          <header className="header">
+            <h1>КРАС.АФИША</h1>
+          </header>
+          <button onClick={() => setCurrentPage("auth")}>Войти</button>
+          <main>
+            <section className="section">
+              <h2>Мероприятия недели</h2>
+              <Slider {...sliderSettings}>
+                {events.map((event) => (
+                  <EventCard key={event.id} event={event} />
+                ))}
+              </Slider>
+            </section>
 
-        {/* Фильтры */}
-        <div className="filter-widget">
-          <button
-            className="filter-button-widget"
-            onClick={() => setFiltersOpen(!filtersOpen)}
-          >
-            <h>Фильтр</h>
-          </button>
-          {filtersOpen && (
-            <div className="filter-dropdown-widget">
-              <div className="filter-item">
-                <FontAwesomeIcon icon={faCalendarAlt} className="icon" />
-                <label>Дата</label>
-                <input
-                  type="date"
-                  value={selectedFilters.date}
-                  onChange={(e) => handleFilterChange("date", e.target.value)}
-                />
-              </div>
-              <div className="filter-item">
-                <FontAwesomeIcon icon={faBookmark} className="icon" />
-                <label>Тип мероприятия</label>
-                <select
-                  value={selectedFilters.type}
-                  onChange={(e) => handleFilterChange("type", e.target.value)}
-                >
-                  <option value="">Все</option>
-                  <option value="concert">Концерт</option>
-                  <option value="theatre">Спектакль</option>
-                  <option value="lecture">Лекция</option>
-                </select>
-              </div>
-              <div className="filter-item">
-                <FontAwesomeIcon icon={faMapMarkerAlt} className="icon" />
-                <label>Площадка</label>
-                <select
-                  value={selectedFilters.location}
-                  onChange={(e) => handleFilterChange("location", e.target.value)}
-                >
-                  <option value="">Все</option>
-                  <option value="venue1">Зал 1</option>
-                  <option value="venue2">Зал 2</option>
-                  <option value="venue3">Зал 3</option>
-                </select>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Раздел "Все мероприятия" */}
-        <section className="section">
-          <h2>Все мероприятия</h2>
-          <div className="filters">
-            <button
-              className={`filter-button ${view === "list" ? "active" : ""}`}
-              onClick={() => setView("list")}
-            >
-              Списком
-            </button>
-            <button
-              className={`filter-button ${view === "map" ? "active" : ""}`}
-              onClick={() => setView("map")}
-            >
-              На карте
-            </button>
-          </div>
-
-          {view === "list" ? (
-            <div className="event-list">
-              {events.map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))}
-            </div>
-          ) : (
-            <div className="map-container">
-              <YMaps>
-                <Map
-                  defaultState={{ center: [55.751574, 37.573856], zoom: 10 }}
-                  width="100%"
-                  height="400px"
-                >
-                  {Object.keys(groupedByAddress).map((address, index) => (
-                    <Placemark
-                      key={index}
-                      geometry={[55.751574 + index * 0.01, 37.573856 + index * 0.01]}
-                      properties={{
-                        hintContent: address,
-                        balloonContent: `Мероприятий: ${groupedByAddress[address].length}`,
-                      }}
-                      options={{ preset: "islands#redIcon" }}
-                      onClick={() => handleMarkerClick(address)}
+            <div className="filter-widget">
+              <button
+                className="filter-button-widget"
+                onClick={() => setFiltersOpen(!filtersOpen)}
+              >
+                <h>Фильтр</h>
+              </button>
+              {filtersOpen && (
+                <div className="filter-dropdown-widget">
+                  <div className="filter-item">
+                    <FontAwesomeIcon icon={faCalendarAlt} className="icon" />
+                    <label>Дата</label>
+                    <input
+                      type="date"
+                      value={selectedFilters.date}
+                      onChange={(e) => handleFilterChange("date", e.target.value)}
                     />
-                  ))}
-                </Map>
-              </YMaps>
-
-              {selectedAddress && (
-                <div className="event-widget">
-                  <h2>Мероприятия по адресу:</h2>
-                  <p>{selectedAddress}</p>
-                  <div className="widget-event-list">
-                    {filteredEvents.map((event) => (
-                      <EventCard key={event.id} event={event} />
-                    ))}
+                  </div>
+                  <div className="filter-item">
+                    <FontAwesomeIcon icon={faBookmark} className="icon" />
+                    <label>Тип мероприятия</label>
+                    <select
+                      value={selectedFilters.type}
+                      onChange={(e) => handleFilterChange("type", e.target.value)}
+                    >
+                      <option value="">Все</option>
+                      <option value="concert">Концерт</option>
+                      <option value="theatre">Спектакль</option>
+                      <option value="lecture">Лекция</option>
+                    </select>
+                  </div>
+                  <div className="filter-item">
+                    <FontAwesomeIcon icon={faMapMarkerAlt} className="icon" />
+                    <label>Площадка</label>
+                    <select
+                      value={selectedFilters.location}
+                      onChange={(e) => handleFilterChange("location", e.target.value)}
+                    >
+                      <option value="">Все</option>
+                      <option value="venue1">Зал 1</option>
+                      <option value="venue2">Зал 2</option>
+                      <option value="venue3">Зал 3</option>
+                    </select>
                   </div>
                 </div>
               )}
             </div>
-          )}
-        </section>
-      </main>
-    </div>
-  );
+
+            <section className="section">
+              <h2>Все мероприятия</h2>
+              <div className="filters">
+                <button
+                  className={`filter-button ${view === "list" ? "active" : ""}`}
+                  onClick={() => setView("list")}
+                >
+                  Списком
+                </button>
+                <button
+                  className={`filter-button ${view === "map" ? "active" : ""}`}
+                  onClick={() => setView("map")}
+                >
+                  На карте
+                </button>
+              </div>
+
+              {view === "list" ? (
+                <div className="event-list">
+                  {events.map((event) => (
+                    <EventCard key={event.id} event={event} />
+                  ))}
+                </div>
+              ) : (
+                <div className="map-container">
+                  <YMaps>
+                    <Map
+                      defaultState={{ center: [55.751574, 37.573856], zoom: 10 }}
+                      width="100%"
+                      height="400px"
+                    >
+                      {Object.keys(groupedByAddress).map((address, index) => (
+                        <Placemark
+                          key={index}
+                          geometry={[55.751574 + index * 0.01, 37.573856 + index * 0.01]}
+                          properties={{
+                            hintContent: address,
+                            balloonContent: `Мероприятий: ${groupedByAddress[address].length}`,
+                          }}
+                          options={{ preset: "islands#redIcon" }}
+                          onClick={() => handleMarkerClick(address)}
+                        />
+                      ))}
+                    </Map>
+                  </YMaps>
+
+                  {selectedAddress && (
+                    <div className="event-widget">
+                      <h2>Мероприятия по адресу:</h2>
+                      <p>{selectedAddress}</p>
+                      <div className="widget-event-list">
+                        {filteredEvents.map((event) => (
+                          <EventCard key={event.id} event={event} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
+          </main>
+        </div>
+      );
+    } else if (currentPage === "auth") {
+      return <AuthPage goBack={() => setCurrentPage("home")} />;
+    }
+  };
+
+  return <div>{renderPage()}</div>;
 };
 
 const SampleNextArrow = (props) => {

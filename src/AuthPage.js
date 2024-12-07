@@ -5,8 +5,8 @@ const AuthPage = () => {
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    // Здесь можно добавить логику для авторизации
-    console.log('Пользователь:', username, 'Пароль:', password);
+    // Логика для авторизации
+    console.log('Имя пользователя:', username, 'Пароль:', password);
   };
 
   return (
