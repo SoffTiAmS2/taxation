@@ -173,14 +173,14 @@ const App = () => {
                 <div className="map-container">
                   <YMaps>
                     <Map
-                      defaultState={{ center: [55.751574, 37.573856], zoom: 10 }}
+                      defaultState={{ center: [55.998572, 92.919065], zoom: 10 }}
                       width="100%"
                       height="400px"
                     >
                       {Object.keys(groupedByAddress).map((address, index) => (
                         <Placemark
                           key={index}
-                          geometry={[55.751574 + index * 0.01, 37.573856 + index * 0.01]}
+                          geometry={[55.998572, 92.919065 + index * 0.01, 55.998572, 92.919065]}
                           properties={{
                             hintContent: address,
                             balloonContent: `Мероприятий: ${groupedByAddress[address].length}`,

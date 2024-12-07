@@ -31,7 +31,6 @@
   }
   
   label {
-    font-family: 'Mohave';
     display: block;
     margin-bottom: 5px;
     font-weight: bold;
@@ -39,10 +38,10 @@
   }
   
   input {
+    font-family: 'Mohave';
     width: 100%;
     padding: 10px;
     font-size: 16px;
-    font-family: 'Mohave';
     border: 1px solid #ddd;
     border-radius: 5px;
     box-sizing: border-box;
@@ -54,7 +53,6 @@
   }
   
   .error {
-    font-family: 'Mohave';
     color: red;
     font-size: 14px;
     margin-bottom: 10px;

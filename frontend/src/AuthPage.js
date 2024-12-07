@@ -26,16 +26,16 @@ const AuthPage = () => {
 
   return (
     <div className="auth-container">
-      <h2>Страница авторизации</h2>
+      <h2>Вход в аккаунт</h2>
       <form className="auth-form">
         <div className="form-group">
-          <label>Имя пользователя</label>
+          <label>Логин</label>
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            placeholder="Введите имя пользователя"
+            placeholder="Введите логин"
           />
         </div>
         <div className="form-group">
