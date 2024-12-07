@@ -16,6 +16,8 @@ import L from "leaflet";
 import "./App.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import AuthPage from './AuthPage'; 
 
 // Пример мероприятий с координатами
 const events = [
@@ -99,7 +101,18 @@ const App = () => {
     <div className="container">
       <header className="header">
         <h1>КРАС.АФИША</h1>
+        <nav>
+          <Link to="/auth">
+          <button className="auth-button">Войти</button>
+          </Link>
+        </nav>
       </header>
+
+      {/* Маршруты */}
+      <Routes>
+          <Route path="/" element={<h2>Главная страница</h2>} />
+          <Route path="/auth" element={<AuthPage />} /> {/* Маршрут для страницы авторизации */}
+        </Routes>
 
       <main>
         {/* Раздел "Мероприятия недели" */}
