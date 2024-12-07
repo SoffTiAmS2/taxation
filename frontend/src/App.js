@@ -10,15 +10,9 @@ import AuthPage from "./AuthPage";
 import RegisterPage from "./RegisterPage";
 
 const App = () => {
-<<<<<<< HEAD
   const [currentPage, setCurrentPage] = useState("home"); // Состояние текущей страницы
   const [user, setUser] = useState(null); // Состояние авторизованного пользователя
   const [view, setView] = useState("list");
-=======
-  const [currentPage, setCurrentPage] = useState("home"); // 'home', 'auth', 'register'
-  const [user, setUser] = useState(null); // Данные авторизованного пользователя
-  const [view, setView] = useState("list"); // Вид отображения: список или карта
->>>>>>> stas6
   const [filtersOpen, setFiltersOpen] = useState(false); // Состояние виджета фильтров
   const [selectedFilters, setSelectedFilters] = useState({
     date: "",
@@ -90,86 +84,6 @@ const App = () => {
   };
 
   const handleLoginSuccess = (userData) => {
-<<<<<<< HEAD
-    setUser(userData); // Сохраняем данные пользователя
-    setCurrentPage("home"); // Возвращаемся на главную страницу
-  };
-
-  const renderPage = () => {
-    if (currentPage === "home") {
-      return (
-        <div className="container">
-          <header className="header">
-            <h1>КРАС.АФИША</h1>
-            {user ? (
-              <p>Добро пожаловать, {user.Role}!</p>
-            ) : (
-              <button onClick={() => setCurrentPage("auth")}>Войти</button>
-            )}
-          </header>
-          <main>
-            <section className="section">
-              <h2>Мероприятия недели</h2>
-              <Slider {...sliderSettings}>
-                {events.map((event) => (
-                  <EventCard key={event.id} event={event} />
-                ))}
-              </Slider>
-            </section>
-
-            <div className="filter-widget">
-              <button
-                className="filter-button-widget"
-                onClick={() => setFiltersOpen(!filtersOpen)}
-              >
-                Фильтр
-              </button>
-              {filtersOpen && (
-                <div className="filter-dropdown-widget">
-                  <div className="filter-item">
-                    <FontAwesomeIcon icon={faCalendarAlt} className="icon" />
-                    <label>Дата</label>
-                    <input
-                      type="date"
-                      value={selectedFilters.date}
-                      onChange={(e) => handleFilterChange("date", e.target.value)}
-                    />
-                  </div>
-                  <div className="filter-item">
-                    <FontAwesomeIcon icon={faBookmark} className="icon" />
-                    <label>Тип мероприятия</label>
-                    <select
-                      value={selectedFilters.type}
-                      onChange={(e) => handleFilterChange("type", e.target.value)}
-                    >
-                      <option value="">Все</option>
-                      <option value="concert">Концерт</option>
-                      <option value="theatre">Спектакль</option>
-                      <option value="lecture">Лекция</option>
-                    </select>
-                  </div>
-                </div>
-              )}
-            </div>
-            <section className="section">
-              <h2>Все мероприятия</h2>
-              <div className="filters">
-                <button
-                  className={`filter-button ${view === "list" ? "active" : ""}`}
-                  onClick={() => setView("list")}
-                >
-                  Списком
-                </button>
-                <button
-                  className={`filter-button ${view === "map" ? "active" : ""}`}
-                  onClick={() => setView("map")}
-                >
-                  На карте
-                </button>
-              </div>
-              {view === "list" ? (
-                <div className="event-list">
-=======
     setUser(userData); // Устанавливаем данные авторизованного пользователя
     setCurrentPage("home");
   };
@@ -209,7 +123,6 @@ const App = () => {
               <section className="section">
                 <h2>Мероприятия недели</h2>
                 <Slider {...sliderSettings}>
->>>>>>> stas6
                   {events.map((event) => (
                     <EventCard key={event.id} event={event} />
                   ))}
@@ -266,36 +179,6 @@ const App = () => {
                     На карте
                   </button>
                 </div>
-<<<<<<< HEAD
-              ) : (
-                <YMaps>
-                  <Map
-                    defaultState={{ center: [55.998572, 92.919065], zoom: 10 }}
-                    width="100%"
-                    height="400px"
-                  >
-                    {Object.keys(groupedByAddress).map((address, index) => (
-                      <Placemark
-                        key={index}
-                        geometry={[55.998572 + index * 0.01, 92.919065]}
-                        properties={{
-                          hintContent: address,
-                          balloonContent: `Мероприятий: ${groupedByAddress[address].length}`,
-                        }}
-                        options={{ preset: "islands#redIcon" }}
-                        onClick={() => handleMarkerClick(address)}
-                      />
-                    ))}
-                  </Map>
-                </YMaps>
-              )}
-            </section>
-          </main>
-        </div>
-      );
-    } else if (currentPage === "auth") {
-      return <AuthPage onLoginSuccess={handleLoginSuccess} />;
-=======
                 {view === "list" ? (
                   <div className="event-list">
                     {events.map((event) => (
@@ -328,7 +211,6 @@ const App = () => {
             </main>
           </div>
         );
->>>>>>> stas6
     }
   };
 

@@ -100,19 +100,6 @@ def login_user():
     if not login or not password:
         return jsonify({"message": "Логин и пароль обязательны"}), 400
 
-<<<<<<< HEAD
-# Авторизация пользователя
-@app.route('/api/login', methods=['POST'])
-def login_user():
-    data = request.json
-    login = data.get('login')
-    password = data.get('password')
-
-    if not login or not password:
-        return jsonify({"message": "Логин и пароль обязательны"}), 400
-
-=======
->>>>>>> stas6
     conn = get_db()
     cursor = conn.cursor()
 

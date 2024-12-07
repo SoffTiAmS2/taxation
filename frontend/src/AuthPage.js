@@ -2,11 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './AuthPage.css';
 
-<<<<<<< HEAD
-const AuthPage = ({ onLoginSuccess }) => {
-=======
 const AuthPage = ({ onLoginSuccess, switchToRegister }) => {
->>>>>>> stas6
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
@@ -18,20 +14,6 @@ const AuthPage = ({ onLoginSuccess, switchToRegister }) => {
     }
 
     try {
-<<<<<<< HEAD
-      // Отправка POST-запроса на API авторизации
-      const response = await axios.post('http://127.0.0.1:5050/api/login', {
-        login: username,
-        password: password,
-      });
-
-      // Успешная авторизация
-      const { UserID, Role, message } = response.data;
-      console.log('Авторизация успешна:', { UserID, Role });
-      alert(`Добро пожаловать! Ваша роль: ${Role}`);
-      
-      // Вызываем callback для уведомления об успешной авторизации
-=======
       setError(null);
 
       const response = await axios.post('http://127.0.0.1:5050/api/login', {
@@ -42,7 +24,6 @@ const AuthPage = ({ onLoginSuccess, switchToRegister }) => {
       const { UserID, Role } = response.data;
       alert(`Добро пожаловать! Ваша роль: ${Role}`);
 
->>>>>>> stas6
       if (onLoginSuccess) onLoginSuccess({ UserID, Role });
     } catch (err) {
       // Обработка ошибок
