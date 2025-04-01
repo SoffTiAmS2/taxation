@@ -22,36 +22,6 @@ const App = () => {
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [filteredEvents, setFilteredEvents] = useState([]);
 
-  // Список мероприятий
-  const events = [
-    {
-      id: 1,
-      title: "Хакатон Цифровой Красноярск",
-      date: "7-8 декабря",
-      location: "Молодёжный ИТ-центр",
-      address: "проспект имени газеты Красноярский рабочий, дом 115а",
-      type: "hackathon",
-      image: "https://via.placeholder.com/200",
-    },
-    {
-      id: 2,
-      title: "Лекция по React",
-      date: "7 декабря",
-      location: "Молодёжный ИТ-центр",
-      address: "проспект имени газеты Красноярский рабочий, дом 115а",
-      type: "lecture",
-      image: "https://via.placeholder.com/200",
-    },
-    {
-      id: 3,
-      title: "Рок-концерт",
-      date: "8 декабря",
-      location: "Музыкальный коворкинг Волна",
-      address: "проспект имени газеты Красноярский рабочий, дом 87",
-      type: "concert",
-      image: "https://via.placeholder.com/200",
-    },
-  ];
 
   // Группировка мероприятий по адресу
   const groupedByAddress = events.reduce((acc, event) => {
@@ -92,6 +62,7 @@ const App = () => {
     setUser(null);
     setCurrentPage("auth");
   };
+console.log(auth);
 
   const renderPage = () => {
     switch (currentPage) {
